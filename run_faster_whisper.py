@@ -1,10 +1,11 @@
 from faster_whisper import WhisperModel
-from segment import segmentation
+from segment import segment_audio, segment_video
 from embed import load_model, embed_audio
 #from embed import embed_audio
 import tensorflow as tf
 import torchaudio, torch
 import os
+from WavLM import WavLM, WavLMConfig
 
 #REMINDER: using the .local faster_whisper
 
@@ -19,6 +20,7 @@ model_size = "large-v3"
 model = WhisperModel(model_size, device="cpu", compute_type="int8")
 
 audioin = "testaudio.wav"
+
 segments, info = model.transcribe(audioin, beam_size=5)
 
 print("Detected language '%s' with probability %f" % (info.language, info.language_probability))
@@ -26,20 +28,25 @@ print("Detected language '%s' with probability %f" % (info.language, info.langua
 #--- PARAMS ---#
 #sampling rate
 sr = 16000
-#segment number initialization
-seg_num = 0
 
-model, cfg = load_model()
+#loading feature extraction model
+feat_model, cfg = load_model()
 
+#SEGMENT AND EMBED AUDIO
 for segment in segments:
-    #print(segment.text)
-    #calling segmentation creates 
-    seg = segmentation(segment, audioin, sr, seg_num)
-    seg_num+=1
-    seg1= torch.randn(1,30000)
-    emb = embed_audio(model, cfg, seg)
+    print(segment.text)
+    seg = segment_audio(segment, audioin, sr, save_into_file=True)
+    print(seg)
+    emb = embed_audio(feat_model, cfg, seg)
     print(emb)
     break
+
+#SEGMENT VIDEO
+videoin = 'marta.mp4'
+
+for segment in segments:
+  segment_video(segment, videoin)
+  break
 
 
 
