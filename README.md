@@ -1,2 +1,2 @@
 # dane-speaker-diarisation-worker
-The most up to date code in the notebook.
+To run, use run_faster_whisper.py file.
